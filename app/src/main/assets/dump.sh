@@ -23,9 +23,17 @@ if busybox df | busybox grep -q "/vendor"; then
   VENDOR_PARTITION=vendor
 fi
 
-TOTAL_SIZE=$(busybox df -B 1 | busybox grep "/system" | busybox tail -n 1 | busybox awk '{print $3}')
+if busybox df -B 1 | busybox grep "/system" | busybox tail -n 1 | busybox grep -q "/dev"; then
+  TOTAL_SIZE=$(busybox df -B 1 | busybox grep "/system" | busybox tail -n 1 | busybox awk '{print $3}')
+else
+  TOTAL_SIZE=$(busybox df -B 1 | busybox grep "/system" | busybox tail -n 1 | busybox awk '{print $2}')
+fi
 if [[ $VENDOR == "1" ]]; then
-  TOTAL_SIZE=$(($TOTAL_SIZE + $(busybox df -B 1 | busybox grep "/vendor" | busybox tail -n 1 | busybox awk '{print $3}')))
+  if busybox df -B 1 | busybox grep "/vendor" | busybox tail -n 1 | busybox grep -q "/dev"; then
+    TOTAL_SIZE=$(($TOTAL_SIZE + $(busybox df -B 1 | busybox grep "/vendor" | busybox tail -n 1 | busybox awk '{print $3}')))
+  else
+    TOTAL_SIZE=$(($TOTAL_SIZE + $(busybox df -B 1 | busybox grep "/vendor" | busybox tail -n 1 | busybox awk '{print $2}')))
+  fi
 fi
 echo "TOTAL_SIZE : $TOTAL_SIZE" >> /sdcard/Dumper/$NAME/$NAME.log
 
