@@ -34,11 +34,21 @@ echo "RAMDISK_ITEMS : $RAMDISK_ITEMS" >> /sdcard/Dumper/$NAME/$NAME.log
 
 cd /
 busybox date >> /sdcard/Dumper/$NAME/$NAME.log
-echo "executing : busybox tar -pcvf - system $VENDOR_PARTITION $RAMDISK_ITEMS | pv -i 0.1 -n -s ${TOTAL_SIZE} | pigz > /sdcard/Dumper/$NAME/$NAME.tar.gz" >> /sdcard/Dumper/$NAME/$NAME.log
+echo "Executing : busybox tar -pcvf - system $VENDOR_PARTITION $RAMDISK_ITEMS | pv -i 0.1 -n -s ${TOTAL_SIZE} | pigz > /sdcard/Dumper/$NAME/$NAME.tar.gz" >> /sdcard/Dumper/$NAME/$NAME.log
 echo "" >> /sdcard/Dumper/$NAME/$NAME.log
 echo "" >> /sdcard/Dumper/$NAME/$NAME.log
 ( busybox tar -pcvf - system $VENDOR_PARTITION $RAMDISK_ITEMS | pv -i 0.1 -n -s ${TOTAL_SIZE} | pigz > /sdcard/Dumper/$NAME/$NAME.tar.gz ) 2>&1 | busybox tee -a /sdcard/Dumper/$NAME/$NAME.log
-echo "done" >> /sdcard/Dumper/$NAME/$NAME.log
+echo "Done" >> /sdcard/Dumper/$NAME/$NAME.log
+busybox date >> /sdcard/Dumper/$NAME/$NAME.log
+
+echo "Saving SELinux contexts" >> /sdcard/Dumper/$NAME/$NAME.log
+echo "" >> /sdcard/Dumper/$NAME/$NAME.log
+echo "" >> /sdcard/Dumper/$NAME/$NAME.log
+busybox find /system | busybox sort | while read file; do busybox ls -aldZ $file 2>&1 | busybox tee -a /sdcard/Dumper/$NAME/$NAME.log; done
+if [[ $VENDOR == "1" ]]; then
+  busybox find /vendor | busybox sort | while read file; do busybox ls -aldZ $file 2>&1 | busybox tee -a /sdcard/Dumper/$NAME/$NAME.log; done
+fi
+echo "Done" >> /sdcard/Dumper/$NAME/$NAME.log
 busybox date >> /sdcard/Dumper/$NAME/$NAME.log
 
 sync
